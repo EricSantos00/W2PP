@@ -54,9 +54,8 @@ The code is under the [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.html) li
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     
 ### Active Contributors: 
-* Luis Gustavo
-* Woz Farias
-* Eric Santos
+* Skewed1 
+* Shepher 
 
 ### Helpful Links:    
 * [W2PP on Ragezone](http://forum.ragezone.com/f302/w2pp-project-1107746/)
