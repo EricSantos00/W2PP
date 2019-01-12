@@ -1419,10 +1419,10 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 				unsigned char TargetMapAttribute = GetAttribute(pMob[idx].TargetX, pMob[idx].TargetY);
 				unsigned char MapAttribute = GetAttribute(pMob[conn].TargetX, pMob[conn].TargetY);
 
-				if ((TargetMapAttribute & 0x1) == 0 || (TargetMapAttribute & 64) == 0)
+				if (TargetMapAttribute & 0x1 || (TargetMapAttribute & 64) == 0)
 					dam = 0;
 
-				if ((MapAttribute & 0x1) == 0 || (MapAttribute & 64) == 0)
+				if (MapAttribute & 0x1 || (MapAttribute & 64) == 0)
 					dam = 0;
 			}
 		}
