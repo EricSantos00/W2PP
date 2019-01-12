@@ -20,7 +20,7 @@
 
 void Exec_MSG_Attack(int conn, char *pMsg)
 {
-	MSG_Attack *m = (MSG_Attack*)pMsg;
+	MSG_Attack *m = reinterpret_cast<MSG_Attack*>(pMsg);
 
 	m->ID = ESCENE_FIELD;
 
@@ -67,7 +67,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 
 	if (ClientTick != SKIPCHECKTICK && pUser[conn].LastAttackTick != SKIPCHECKTICK)
 	{
-		if (ClientTick < (unsigned int)pUser[conn].LastAttackTick - 100)
+		if (ClientTick < static_cast<unsigned int>(pUser[conn].LastAttackTick) - 100)
 			AddCrackError(conn, 4, 7);
 
 		LastAttackTick = pUser[conn].LastAttackTick;
@@ -85,7 +85,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 		else
 			ClientTick15sec = CurrentTime - 120000;
 
-		if (ClientTick > CurrentTime + 15000 || ClientTick < (unsigned int)ClientTick15sec)
+		if (static_cast<unsigned int>(ClientTick) > CurrentTime + 15000 || static_cast<int>(ClientTick) < ClientTick15sec)
 		{
 			Log("etc,clienttime faster than 15 sec - MSG_ATTACK", pUser[conn].AccountName, pUser[conn].IP);
 			AddCrackError(conn, 1, 107);
@@ -298,11 +298,9 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 	{
 		if (i >= MAX_TARGET && m->Size <= sizeof(MSG_Attack))
 			break;
-
-		else if (i >= 1 && m->Size <= sizeof(MSG_AttackOne))
+		if (i >= 1 && m->Size <= sizeof(MSG_AttackOne))
 			break;
-
-		else if (i >= 2 && m->Size <= sizeof(MSG_AttackTwo))
+		if (i >= 2 && m->Size <= sizeof(MSG_AttackTwo))
 			break;
 
 
@@ -350,7 +348,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 			continue;
 		}
 
-		long long dam = m->Dam[i].Damage;
+		int dam = m->Dam[i].Damage;
 
 		if (dam != -2 && dam != -1 && dam)
 		{
@@ -454,7 +452,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 			if (idx < MAX_USER)
 				Ac *= 3;
 
-			dam = BASE_GetDamage((int)dam, Ac, master);
+			dam = BASE_GetDamage(dam, Ac, master);
 
 			if (i == 0 && m->Size >= sizeof(MSG_AttackTwo) && pMob[conn].MOB.Class == 3 && (pMob[conn].MOB.LearnedSkill & 0x200000) && (rand() % 4) == 0)
 			{
@@ -584,7 +582,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 					if (idx >= MAX_USER)
 						MobResist = MobResist / 2;
 
-					dam = ((150 - MobResist) * dam) / 100;
+					dam = (150 - MobResist) * dam / 100;
 				}
 			}
 
@@ -598,7 +596,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 				if (idx < MAX_USER)
 					Ac *= 3;
 
-				dam = BASE_GetDamage((int)dam, Ac, master);
+				dam = BASE_GetDamage(dam, Ac, master);
 
 				dam = dam / 2;
 			}
@@ -652,7 +650,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 					if (sanc < 2)
 						sanc = 2;
 
-					pMob[idx].MOB.CurrentScore.Hp = pMob[idx].MOB.CurrentScore.Hp - ((int)dam / sanc);
+					pMob[idx].MOB.CurrentScore.Hp = pMob[idx].MOB.CurrentScore.Hp - dam / sanc;
 
 				}
 				else  if (pMob[idx].MOB.Equip[13].sIndex == 1936)
@@ -663,7 +661,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 
 					sanc *= 10;
 
-					pMob[idx].MOB.CurrentScore.Hp = pMob[idx].MOB.CurrentScore.Hp - ((int)dam / (sanc * 10));
+					pMob[idx].MOB.CurrentScore.Hp = pMob[idx].MOB.CurrentScore.Hp - dam / sanc;
 
 				}
 
@@ -675,12 +673,12 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 
 					sanc *= 1000;
 
-					pMob[idx].MOB.CurrentScore.Hp = pMob[idx].MOB.CurrentScore.Hp - ((int)dam / (sanc * 20));
+					pMob[idx].MOB.CurrentScore.Hp = pMob[idx].MOB.CurrentScore.Hp - dam / sanc;
 
 				}
 
 				else
-					pMob[idx].MOB.CurrentScore.Hp = pMob[idx].MOB.CurrentScore.Hp - (int)dam;
+					pMob[idx].MOB.CurrentScore.Hp = pMob[idx].MOB.CurrentScore.Hp - dam;
 
 
 				if (pMob[idx].MOB.CurrentScore.Hp > pMob[idx].MOB.CurrentScore.MaxHp)
@@ -690,7 +688,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 					SetReqHp(idx);
 
 
-				int calc_exp = (pMob[idx].MOB.CurrentScore.Hp - MobHP) >> 3;
+				int calc_exp = pMob[idx].MOB.CurrentScore.Hp - MobHP >> 3;
 
 				if (calc_exp > 120)
 					calc_exp = 120;
@@ -808,7 +806,6 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 #pragma region Evock
 			else if (InstanceType == 11)
 			{
-
 				int instancevalue = g_pSpell[skillnum].InstanceValue;
 
 				if (instancevalue >= 1 && instancevalue <= 50)
@@ -840,9 +837,6 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 #pragma region Chamas etereas
 			else if (InstanceType == 12)
 			{
-				int targetLevel = pMob[idx].MOB.CurrentScore.Level;
-				int level = pMob[conn].MOB.CurrentScore.Level;
-
 				int Rand = rand() % 100;
 
 				if (idx < MAX_USER)
@@ -947,7 +941,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 				sm_act.Effect = 2;
 				sm_act.Speed = 6;
 
-				GridMulticast(idx, PosX, PosY, (MSG_STANDARD*)&sm_act);
+				GridMulticast(idx, PosX, PosY, reinterpret_cast<MSG_STANDARD*>(&sm_act));
 
 				if (idx < MAX_USER)
 				{
@@ -956,7 +950,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 
 					sm_act.Effect = 2;
 					sm_act.Speed = 6;
-					pUser[idx].cSock.AddMessage((char*)&sm_act, sizeof(MSG_Action));
+					pUser[idx].cSock.AddMessage(reinterpret_cast<char*>(&sm_act), sizeof(MSG_Action));
 				}
 
 				if (idx >= MAX_USER)
@@ -994,10 +988,10 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 					sm_act.Type = 2;
 					sm_act.Speed = 2;
 
-					GridMulticast(idx, PosX, PosY, (MSG_STANDARD*)&sm_act);
+					GridMulticast(idx, PosX, PosY, reinterpret_cast<MSG_STANDARD*>(&sm_act));
 
 					if (idx < MAX_USER)
-						pUser[idx].cSock.AddMessage((char*)&sm_act, sizeof(MSG_Action));
+						pUser[idx].cSock.AddMessage(reinterpret_cast<char*>(&sm_act), sizeof(MSG_Action));
 
 					memset(&sm_act, 0, sizeof(MSG_Action));
 					GetAction(conn, PosX, PosY, &sm_act);
@@ -1005,8 +999,8 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 					sm_act.Type = 2;
 					sm_act.Speed = 2;
 
-					GridMulticast(conn, PosX, PosY, (MSG_STANDARD*)&sm_act);
-					pUser[conn].cSock.AddMessage((char*)&sm_act, sizeof(MSG_Action));
+					GridMulticast(conn, PosX, PosY, reinterpret_cast<MSG_STANDARD*>(&sm_act));
+					pUser[conn].cSock.AddMessage(reinterpret_cast<char*>(&sm_act), sizeof(MSG_Action));
 				}
 			}
 #pragma endregion
@@ -1043,7 +1037,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 
 					MSG_CreateMob CreateMob;
 					GetCreateMob(idx, &CreateMob);
-					GridMulticast(pMob[idx].TargetX, pMob[idx].TargetY, (MSG_STANDARD*)&CreateMob, 0);
+					GridMulticast(pMob[idx].TargetX, pMob[idx].TargetY, reinterpret_cast<MSG_STANDARD*>(&CreateMob), 0);
 				}
 			}
 #pragma endregion
@@ -1059,7 +1053,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 				if (skill_target <= 1)
 					skill_target = 2;
 
-				for (int q = 0; q < skill_target && ((q < MAX_TARGET && m->Size >= sizeof(MSG_Attack)) || (q < 1 && m->Size >= sizeof(MSG_AttackOne)) || (q < 2 && m->Size >= sizeof (MSG_AttackTwo))); q++)
+				for (int q = 0; q < skill_target && (q < MAX_TARGET && m->Size >= sizeof(MSG_Attack) || (q < 1 && m->Size >= sizeof(MSG_AttackOne)) || (q < 2 && m->Size >= sizeof (MSG_AttackTwo))); q++)
 				{
 					int targetidx = m->Dam[q].TargetID;
 
@@ -1090,7 +1084,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 				if (skill_target <= 1)
 					skill_target = 2;
 
-				for (int q = 0; q < skill_target && ((q < MAX_TARGET && m->Size >= sizeof(MSG_Attack)) || (q < 1 && m->Size >= sizeof(MSG_AttackOne)) || (q < 2 && m->Size >= sizeof (MSG_AttackTwo))); q++)
+				for (int q = 0; q < skill_target && ((q < MAX_TARGET && m->Size >= sizeof(MSG_Attack)) || (q < 1 && m->Size >= sizeof(MSG_AttackOne)) || q < 2 && m->Size >= sizeof (MSG_AttackTwo)); q++)
 				{
 					int targetidx = m->Dam[q].TargetID;
 					if (targetidx <= MOB_EMPTY || targetidx >= MAX_USER)
@@ -1276,7 +1270,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 			return;
 		}
 
-		m->Dam[i].Damage = (int)dam;
+		m->Dam[i].Damage = dam;
 
 		if (dam <= 0)
 			continue;
@@ -1299,7 +1293,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 			else if (dam > 0)
 				dam = dam + pMob[conn].ForceDamage;
 
-			m->Dam[i].Damage = (int)dam;
+			m->Dam[i].Damage = dam;
 		}
 #pragma endregion
 
@@ -1307,12 +1301,12 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 		if (pMob[conn].PvPDamage != 0 && idx < MAX_USER)
 		{
 			if (dam <= 1)
-				dam += (dam * pMob[conn].PvPDamage / 100);
+				dam += dam * pMob[conn].PvPDamage / 100;
 
 			else if (dam > 0)
-				dam += (dam / 100 * pMob[conn].PvPDamage);
+				dam += dam / 100 * pMob[conn].PvPDamage;
 
-			m->Dam[i].Damage = (int)dam;
+			m->Dam[i].Damage = dam;
 		}
 #pragma endregion
 
@@ -1377,14 +1371,14 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 					{
 						MSG_CreateMob mob;
 						GetCreateMob(conn, &mob);
-						GridMulticast(pMob[conn].TargetX, pMob[conn].TargetY, (MSG_STANDARD*)&mob, 0);
+						GridMulticast(pMob[conn].TargetX, pMob[conn].TargetY, reinterpret_cast<MSG_STANDARD*>(&mob), 0);
 					}
 
 					if (IdxGuilty == 0)
 					{
 						MSG_CreateMob mob;
 						GetCreateMob(idx, &mob);
-						GridMulticast(pMob[idx].TargetX, pMob[idx].TargetY, (MSG_STANDARD*)&mob, 0);
+						GridMulticast(pMob[idx].TargetX, pMob[idx].TargetY, reinterpret_cast<MSG_STANDARD*>(&mob), 0);
 					}
 				}
 			}
@@ -1442,7 +1436,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 		if (dam >= MAX_DAMAGE)
 			dam = MAX_DAMAGE;
 
-		m->Dam[i].Damage = (int)dam;
+		m->Dam[i].Damage = dam;
 
 		if (dam <= 0)
 			continue;
@@ -1508,8 +1502,8 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 		if (idx < MAX_USER && pTargetMountId >= 2360 && pTargetMountId < 2390 && pMob[idx].MOB.Equip[14].stEffect[0].sValue > 0)
 		{
 
-			_pDamage = (int)((dam * 3) >> 2);
-			_calcDamage = (int)(dam - _pDamage);
+			_pDamage = (dam * 3) >> 2;
+			_calcDamage = dam - _pDamage;
 			if (_pDamage <= 0)
 				_pDamage = 1;
 
@@ -1523,7 +1517,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 		{
 			if (pMob[idx].Affect[c].Type == 18)
 			{
-				if (pMob[idx].MOB.CurrentScore.Mp >((pMob[idx].MOB.CurrentScore.MaxMp / 100) * 10))
+				if (pMob[idx].MOB.CurrentScore.Mp > pMob[idx].MOB.CurrentScore.MaxMp / 100 * 10)
 				{
 					int mana = pMob[idx].MOB.CurrentScore.Mp - tDamage;
 
@@ -1553,11 +1547,9 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 
 		if (pMob[idx].MOB.Equip[13].sIndex == 786)
 		{
-
 			int itemSanc = pMob[idx].MOB.Equip[13].stEffect[0].cValue;
 			if (itemSanc < 2)
 				itemSanc = 2;
-
 
 			tDamage = _pDamage / itemSanc;
 			if (tDamage > pMob[idx].MOB.CurrentScore.Hp)
@@ -1566,9 +1558,8 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 			pMob[idx].MOB.CurrentScore.Hp = pMob[idx].MOB.CurrentScore.Hp - tDamage;
 		}
 
-		else if (pMob[idx].MOB.Equip[13].sIndex == 1936)//10X HP MONSTRO
+		else if (pMob[idx].MOB.Equip[13].sIndex == 1936)
 		{
-
 			int itemSanc = pMob[idx].MOB.Equip[13].stEffect[0].cValue;
 			if (itemSanc < 2)
 				itemSanc = 2;
@@ -1583,7 +1574,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 			pMob[idx].MOB.CurrentScore.Hp = pMob[idx].MOB.CurrentScore.Hp - tDamage;
 		}
 
-		else if (pMob[idx].MOB.Equip[13].sIndex == 1937)//20X HP MONSTRO
+		else if (pMob[idx].MOB.Equip[13].sIndex == 1937)
 		{
 			int itemSanc = pMob[idx].MOB.Equip[13].stEffect[0].cValue;
 			if (itemSanc < 2)
@@ -1618,13 +1609,13 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 			SendSay(idx, temp);
 		}
 
-
 		if (idx > 0 && idx < MAX_USER)
 		{
 			pUser[idx].ReqHp = pUser[idx].ReqHp - tDamage;
 
 			SetReqHp(idx);
 		}
+
 		sprintf(temp, "etc,msg_attack attacker:%d name:%s target:%d name:%s dam:%d x:%d y:%d", conn, pMob[conn].MOB.MobName, idx, pMob[idx].MOB.MobName, m->Dam[i].Damage, pMob[idx].TargetX, pMob[idx].TargetY);
 		Log(temp, pUser[conn].AccountName, pUser[conn].IP);
 
@@ -1634,7 +1625,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 #pragma region Joia Abs
 		if (pMob[conn].HpAbs != 0 && (rand() % 2) == 0 && dam >= 1)
 		{
-			int RecHP = (int)((dam * pMob[conn].HpAbs + 1) / 100);
+			int RecHP = (dam * pMob[conn].HpAbs + 1) / 100;
 
 			if (RecHP > 350)
 				RecHP = 350;
@@ -1731,7 +1722,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 		m->ClientTick = CurrentTime;
 
 	if (skillnum != 102)
-		GridMulticast(pMob[conn].TargetX, pMob[conn].TargetY, (MSG_STANDARD*)m, 0);
+		GridMulticast(pMob[conn].TargetX, pMob[conn].TargetY, reinterpret_cast<MSG_STANDARD*>(m), 0);
 
 	if (skillnum == 30)
 		SendSetHpMp(conn);
@@ -1779,7 +1770,7 @@ void Exec_MSG_Attack(int conn, char *pMsg)
 			memset(&sm_lup, 0, sizeof(MSG_CreateMob));
 			GetCreateMob(conn, &sm_lup);
 
-			GridMulticast(pMob[conn].TargetX, pMob[conn].TargetY, (MSG_STANDARD*)&sm_lup, 0);
+			GridMulticast(pMob[conn].TargetX, pMob[conn].TargetY, reinterpret_cast<MSG_STANDARD*>(&sm_lup), 0);
 
 			sprintf(temp, "lvl %s level up to %d", pMob[conn].MOB.MobName, pMob[conn].MOB.BaseScore.Level);
 			Log(temp, pUser[conn].AccountName, pUser[conn].IP);
